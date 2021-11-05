@@ -11,20 +11,6 @@ import java.io.FileFilter;
 import java.util.HashMap;
 import java.util.Objects;
 
-/**
- * Map Tester:
- * Will just test the map so that we don't have to run it from the main class and specify which type we want to run
- * its just easier on us running it from a tester
- * <p>
- * Need to do:
- * N/A
- * <p>
- * Could do later:
- * N/A
- * <p>
- * Bugs:
- * N/A
- */
 
 public class MapRunner {
     private final int WIDTH;
@@ -82,7 +68,7 @@ public class MapRunner {
             String input = String.valueOf(move);
             if (input.equals(":")) {
                 assert map != null;
-//                map.saveState(getName(movement.substring(movement.indexOf(":") + 1)), user);
+                map.saveState(getName(movement.substring(movement.indexOf(":") + 1)), user);
                 map.saveState(null, user);
                 return world;
             }
@@ -115,18 +101,22 @@ public class MapRunner {
 
             } else if (val.equals("l")) {
                 File save = Utils.join(CWD, "playerinfo.txt");
-                String info = Utils.readContentsAsString(save);
-                Seed = Long.parseLong(info.substring(1, info.indexOf("s")));
-                map = new Map(WIDTH, HEIGHT, Seed, world);
-                map.makeMap();
-                String moves = info.substring(info.indexOf("s") + 1, info.indexOf("-"));
-                TETile avatar = getTETile(info.substring(info.indexOf("-") + 1, info.indexOf("=")));
-                difficulty = info.substring(info.indexOf("=") + 1);
-                map.setDifficulty(difficulty, user);
-                assert avatar != null;
-                user = getPlayerNamed(avatar.description(), map);
-                assert user != null;
-                Engine.interactWithInputString(moves, user, map, world);
+                if(save.exists()){
+                    String info = Utils.readContentsAsString(save);
+                    Seed = Long.parseLong(info.substring(1, info.indexOf("s")));
+                    map = new Map(WIDTH, HEIGHT, Seed, world);
+                    map.makeMap();
+                    String moves = info.substring(info.indexOf("s") + 1, info.indexOf("-"));
+                    TETile avatar = getTETile(info.substring(info.indexOf("-") + 1, info.indexOf("=")));
+                    difficulty = info.substring(info.indexOf("=") + 1);
+                    map.setDifficulty(difficulty, user);
+                    assert avatar != null;
+                    user = getPlayerNamed(avatar.description(), map);
+                    assert user != null;
+                    Engine.interactWithInputString(moves, user, map, world);
+                }else{
+                    noSavesMenu();
+                }
             } else if (val.equals("c")) {
                 user = selectMenu(map);
                 val = null;
@@ -147,7 +137,7 @@ public class MapRunner {
                 int holder = (int) StdDraw.nextKeyTyped();
                 if (codes.containsKey(holder)) {
                     String key = codes.get(holder);
-                    if (key.equals(":")) {
+                    if (key.equals("Enter")) {
                         map.saveState(getName(), user);
                         endMenu("End of Game");
                         break;
@@ -165,7 +155,7 @@ public class MapRunner {
         }
     }
 
-    public String chooseDifficultyMenu() {
+    private String chooseDifficultyMenu() {
         StdDraw.clear();
         StdDraw.clear(Color.BLACK);
         StdDraw.setPenColor(Color.white);
@@ -180,6 +170,23 @@ public class MapRunner {
                 String val = codes.get((int) StdDraw.nextKeyTyped());
                 if (val.equals("e") || val.equals("n") || val.equals("h")) {
                     return val;
+                }
+            }
+        }
+    }
+
+    private void noSavesMenu(){
+        StdDraw.clear();
+        StdDraw.clear(Color.BLACK);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text((int) (WIDTH / 2), (int) (HEIGHT / 2), "No Saves");
+        StdDraw.text(4, 1, "Unimpossible Inc.");
+        StdDraw.show();
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                String val = codes.get((int) StdDraw.nextKeyTyped());
+                if (val.equals("s")) {
+                    // return getPlayerNamed(avatars[index].description(), map);
                 }
             }
         }
@@ -255,7 +262,6 @@ public class MapRunner {
         StdDraw.text(4, 1, "Unimpossible Inc.");
         StdDraw.show();
         if (StdDraw.hasNextKeyTyped()) {
-//            System.out.println((int) StdDraw.nextKeyTyped());
             String val = codes.get((int) StdDraw.nextKeyTyped());
             if (val.equals("q") || val.equals("n") || val.equals("l") || val.equals("c") || val.equals("d")) {
                 return val;
@@ -348,11 +354,11 @@ public class MapRunner {
 
     private String getSeed() {
         String seed = "";
-        printMenu(seed, "Enter Seed and hit (S) to begin");
+        printMenu(seed, "Enter Seed and hit (Enter) to begin");
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 String key = codes.get((int) StdDraw.nextKeyTyped());
-                if (key.equals("s")) {
+                if (key.equals("Enter")) {
                     return seed;
                 } else {
                     if (!numbers.contains(key)) {
@@ -360,7 +366,7 @@ public class MapRunner {
                     }
                     seed += key;
                 }
-                printMenu(seed, "Enter Seed and hit (S) to begin");
+                printMenu(seed, "Enter Seed and hit (Enter) to begin");
 
             }
         }
@@ -376,19 +382,19 @@ public class MapRunner {
 
     private String getName() {
         String name = "";
-        printMenu(name, "Enter Save Name and press (S) or press (Q) to quick save");
+        printMenu(name, "Enter Save Name and press (S) or press (Enter) to quick save");
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 String key = codes.get((int) StdDraw.nextKeyTyped());
-                if (key.equals("q")) {
+                if (key.equals("Enter")) {
                     return "Game " + CWD.listFiles(filter).length + 1;
                 }
-                if (key.equals("s") || name.length() > 0) {
+                if (key.equals("S") || name.length() > 0) {
                     return name;
                 } else {
                     name += key;
                 }
-                printMenu(name, "Enter Save Name and press (S) or press (Q) to quick save");
+                printMenu(name, "Enter Save Name and press (S) or press (Enter) to quick save");
 
             }
         }
@@ -423,34 +429,34 @@ public class MapRunner {
         StdDraw.pause(5000);
     }
 
-    //make pretty
+    //NOT DONEEEEEEEEEEEEEE
     private String getSaved() {
         File[] files = CWD.listFiles(filter);
-//        if (files == null || files.length == 0) {
-//            endMenu("No Games Saved");
-//        }
-//        if (files.length == 1) {
-//            return files[0];
-//        }
-//        StdDraw.clear(Color.BLACK);
-//        StdDraw.setPenColor(Color.white);
-//        StdDraw.text(WIDTH / 2, HEIGHT - 4, "Choose Saved Game");
-//        int scale = HEIGHT / (files.length + 1) - 4;
-//        int count = 1;
-//        for (File file : files) {
-//            StdDraw.text(WIDTH / 2, scale * count, count + " : " + file.getName());
-//            count++;
-//        }
-//        StdDraw.show();
-//        while (true) {
-//            if (StdDraw.hasNextKeyTyped()) {
-//                String val = codes.get((int) StdDraw.nextKeyTyped());
-//                if (numbers.contains(String.valueOf(val)) && Integer.parseInt(val) <= files.length) {
-//                    return files[Integer.parseInt(val) - 1];
-//                }
-//            }
-//        }
-        return null;
+       if (files == null || files.length == 0) {
+        //    endMenu("No Games Saved");
+       }
+       if (files.length == 1) {
+        //    return files[0];
+       }
+       StdDraw.clear(Color.BLACK);
+       StdDraw.setPenColor(Color.white);
+       StdDraw.text(WIDTH / 2, HEIGHT - 4, "Choose Saved Game");
+       int scale = HEIGHT / (files.length + 1) - 4;
+       int count = 1;
+       for (File file : files) {
+           StdDraw.text(WIDTH / 2, scale * count, count + " : " + file.getName());
+           count++;
+       }
+       StdDraw.show();
+       while (true) {
+           if (StdDraw.hasNextKeyTyped()) {
+               String val = codes.get((int) StdDraw.nextKeyTyped());
+               if (numbers.contains(String.valueOf(val)) && Integer.parseInt(val) <= files.length) {
+                //    return files[Integer.parseInt(val) - 1];
+               }
+           }
+       }
+        // return null;
     }
 
     private void HUD(TETile[][] world, Player user, Map map) {
